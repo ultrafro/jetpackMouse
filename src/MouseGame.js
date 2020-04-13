@@ -21,10 +21,13 @@ class MouseGame {
 
     this.velocity = new Vector3();
     this.gravityAcc = new Vector3(0, -9.8, 0);
+    //this.gravityAcc = new Vector3(0, -20, 0);
     this.gravityVel = new Vector3();
     this.boostVel = new Vector3();
     this.boostAcc = new Vector3(0, 10, 0);
     this.boost = false;
+
+    this.buildingMap = null;
   }
 
   init() {
@@ -46,8 +49,10 @@ class MouseGame {
     var ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
     this.scene.add(ambientLight);
 
-    const city = makeCity(this.renderer);
-    this.scene.add(city);
+    const { cityMesh, buildingMap } = makeCity(this.renderer);
+    this.scene.add(cityMesh);
+
+    this.buildingMap = buildingMap;
 
     //this.controls = new OrbitControls(this.camera, this.element);
     //this.controls = new PointerLockControls(this.camera, this.element);
@@ -110,6 +115,25 @@ class MouseGame {
     );
   }
 
+  checkCollision({ position, buildingMap }) {
+    let collision = false;
+    for (let key in buildingMap) {
+      let building = buildingMap[key];
+
+      //check if position is in building:
+      let xdist = Math.abs(position.x - building.x);
+      let zdist = Math.abs(position.z - building.z);
+      let ydist = position.y - building.scaleY;
+
+      if (xdist < building.scaleX && zdist < building.scaleZ && ydist < 0.5) {
+        collision = true;
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   update() {
     //console.log("loop");
     //console.log(this.camera.position.y);
@@ -133,7 +157,7 @@ class MouseGame {
       //   boostPart.multiplyScalar(elapsed / 1000);
       //   this.boostVel.add(boostPart);
       //   this.velocity.add(this.boostVel);
-      this.velocity.add(new Vector3(0, 100, 0));
+      this.velocity.add(new Vector3(0, 10, 0));
       this.gravityVel = new Vector3();
     } else {
       let gravityPart = new Vector3();
@@ -164,7 +188,7 @@ class MouseGame {
     right.copy(forward);
     right.cross(up);
 
-    let directionalFactor = 4;
+    let directionalFactor = 10;
 
     if (this.up) {
       let additional = new Vector3();
@@ -199,7 +223,14 @@ class MouseGame {
     delta.multiplyScalar(elapsed / 1000);
 
     potentialPosition.add(delta);
-    let collision = false;
+
+    let start = performance.now();
+    let collision = this.checkCollision({
+      position: potentialPosition,
+      buildingMap: this.buildingMap,
+    });
+    //console.log("time to check collision: " + (performance.now() - start));
+
     if (potentialPosition.y < 0 || collision) {
       this.velocity = new Vector3(0, 0, 0);
       this.gravityVel = new Vector3();

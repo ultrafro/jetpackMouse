@@ -1,5 +1,7 @@
 import * as THREE from "three";
 const makeCity = (renderer) => {
+  let buildingMap = [];
+
   // build the base geometry for each building
   var geometry = new THREE.CubeGeometry(1, 1, 1);
   // translate the geometry to place the pivot point at the bottom instead of the center
@@ -37,6 +39,16 @@ const makeCity = (renderer) => {
       Math.random() * Math.random() * Math.random() * buildingMesh.scale.x * 8 +
       8;
     buildingMesh.scale.z = buildingMesh.scale.x;
+
+    buildingMap.push({
+      x: buildingMesh.position.x,
+      y: buildingMesh.position.y,
+      z: buildingMesh.position.z,
+      rotation: buildingMesh.position.rotation,
+      scaleX: buildingMesh.scale.x,
+      scaleY: buildingMesh.scale.y,
+      scaleZ: buildingMesh.scale.z,
+    });
 
     // establish the base color for the buildingMesh
     var value = 1 - Math.random() * Math.random();
@@ -118,7 +130,9 @@ const makeCity = (renderer) => {
     // return the just built canvas2
     return canvas2;
   }
-  return cityMesh;
+
+  return { cityMesh, buildingMap };
+  //return cityMesh;
 };
 
 export default makeCity;
