@@ -20,7 +20,10 @@ class MouseGame {
     this.lastTime = performance.now();
 
     this.velocity = new Vector3();
-    this.gravity = new Vector3(0, -1.0, 0);
+    this.gravityAcc = new Vector3(0, -9.8, 0);
+    this.gravityVel = new Vector3();
+    this.boostVel = new Vector3();
+    this.boostAcc = new Vector3(0, 10, 0);
     this.boost = false;
   }
 
@@ -36,6 +39,7 @@ class MouseGame {
     this.camera.add(mesh);
 
     mesh.position.set(0, 0, -1);
+    this.camera.position.set(0, 100, 0);
 
     //makeCity2({ scene, steps: 100 });
 
@@ -120,10 +124,32 @@ class MouseGame {
     //this.controls.target.set(newX, newY, newZ);
 
     this.velocity = new Vector3();
-    this.velocity.add(this.gravity);
+
+    //this.velocity.add(new Vector3(0, -10, 0));
+
     if (this.boost) {
-      this.velocity.add(new Vector3(0, 5.0, 0));
+      //   let boostPart = new Vector3();
+      //   boostPart.copy(this.boostAcc);
+      //   boostPart.multiplyScalar(elapsed / 1000);
+      //   this.boostVel.add(boostPart);
+      //   this.velocity.add(this.boostVel);
+      this.velocity.add(new Vector3(0, 100, 0));
+      this.gravityVel = new Vector3();
+    } else {
+      let gravityPart = new Vector3();
+      gravityPart.copy(this.gravityAcc);
+      gravityPart.multiplyScalar(elapsed / 1000);
+      this.gravityVel.add(gravityPart);
+
+      this.velocity.add(this.gravityVel);
     }
+
+    // console.log(
+    //   "gravity y: " +
+    //     this.gravityVel.y.toFixed(3) +
+    //     " v: " +
+    //     this.velocity.y.toFixed(3)
+    // );
 
     let forward = new THREE.Vector3();
     this.camera.getWorldDirection(forward);
@@ -167,15 +193,20 @@ class MouseGame {
 
     let potentialPosition = new Vector3();
     potentialPosition.copy(this.camera.position);
-    potentialPosition.add(this.velocity);
-    let collision = false;
-    if (potentialPosition.y < 0 || collision) {
-      this.velocity = new Vector3(0, 0, 0);
-    }
 
     let delta = new Vector3();
     delta.copy(this.velocity);
     delta.multiplyScalar(elapsed / 1000);
+
+    potentialPosition.add(delta);
+    let collision = false;
+    if (potentialPosition.y < 0 || collision) {
+      this.velocity = new Vector3(0, 0, 0);
+      this.gravityVel = new Vector3();
+      this.boostVel = new Vector3();
+      delta = new Vector3();
+    }
+
     this.camera.position.add(delta);
     //this.camera.position.set(newX, newY, newZ);
 
