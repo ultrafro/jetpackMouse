@@ -8,6 +8,8 @@ import makeCity from "./makecity";
 import makeCity2 from "./makeCity2";
 import LookControls from "./LookControls";
 import { Vector3 } from "three";
+import ParticleSystem from "./ParticleSystem";
+//import Partykals from "partykals";
 
 class MouseGame {
   constructor({ scene, camera, renderer, element }) {
@@ -20,8 +22,8 @@ class MouseGame {
     this.lastTime = performance.now();
 
     this.velocity = new Vector3();
-    this.gravityAcc = new Vector3(0, -9.8, 0);
-    //this.gravityAcc = new Vector3(0, -20, 0);
+    //this.gravityAcc = new Vector3(0, -9.8, 0);
+    this.gravityAcc = new Vector3(0, -100, 0);
     this.gravityVel = new Vector3();
     this.boostVel = new Vector3();
     this.boostAcc = new Vector3(0, 10, 0);
@@ -53,6 +55,60 @@ class MouseGame {
     this.scene.add(cityMesh);
 
     this.buildingMap = buildingMap;
+
+    this.system = new ParticleSystem({
+      numParticles: 100,
+      velocity: new Vector3(0, -10.0, 0),
+      lifetime: 0.1,
+      radius: 1,
+      startColor: new THREE.Color(1, 0, 0),
+      stopColor: new THREE.Color(1, 0, 0),
+      src: "smoke.png",
+    });
+
+    this.scene.add(this.system.particleSystem);
+    mesh.add(this.system.particleSystem);
+    this.system.particleSystem.position.set(-0.5, -2, -4);
+
+    // // create the particle variables
+    // var particleCount = 1800;
+    // var particles = new THREE.Geometry();
+    // // var pMaterial = new THREE.ParticleBasicMaterial({
+    // //     color: 0xffffff,
+    // //     size: 20,
+    // //   });
+
+    // var pMaterial = new THREE.ParticleBasicMaterial({
+    //   color: 0xffffff,
+    //   size: 20,
+    //   map: THREE.ImageUtils.loadTexture("smoke.png"),
+    //   blending: THREE.AdditiveBlending,
+    //   transparent: true,
+    // });
+
+    // // now create the individual particles
+    // for (var p = 0; p < particleCount; p++) {
+    //   // create a particle with random
+    //   // position values, -250 -> 250
+    //   let pX = Math.random() * 500 - 250,
+    //     pY = Math.random() * 500 - 250,
+    //     pZ = Math.random() * 500 - 250,
+    //     v = new THREE.Vector3(pX, pY, pZ);
+    //   let particle = new THREE.Vertex(pX, pY, pZ);
+    //   //particle = new THREE.Vertex(new THREE.Vector3(pX, pY, pZ));
+
+    //   //console.log(pX, pY, pZ);
+    //   // add it to the geometry
+    //   particles.vertices.push(particle);
+    // }
+
+    // // create the particle system
+    // //this.particleSystem = new THREE.ParticleSystem(particles, pMaterial);
+    // this.particleSystem = new THREE.Points(particles, pMaterial);
+    // this.particleSystem.sortParticles = true;
+
+    // // add it to the scene
+    // this.scene.add(this.particleSystem);
 
     //this.controls = new OrbitControls(this.camera, this.element);
     //this.controls = new PointerLockControls(this.camera, this.element);
@@ -157,7 +213,7 @@ class MouseGame {
       //   boostPart.multiplyScalar(elapsed / 1000);
       //   this.boostVel.add(boostPart);
       //   this.velocity.add(this.boostVel);
-      this.velocity.add(new Vector3(0, 10, 0));
+      this.velocity.add(new Vector3(0, 50, 0));
       this.gravityVel = new Vector3();
     } else {
       let gravityPart = new Vector3();
@@ -188,7 +244,7 @@ class MouseGame {
     right.copy(forward);
     right.cross(up);
 
-    let directionalFactor = 10;
+    let directionalFactor = 30;
 
     if (this.up) {
       let additional = new Vector3();
@@ -239,8 +295,20 @@ class MouseGame {
     }
 
     this.camera.position.add(delta);
-    //this.camera.position.set(newX, newY, newZ);
 
+    //this.particleSystem.rotation.y += 0.01;
+
+    if (this.boost) {
+      //this.system.particleSystem.visible = true;
+      this.system.show();
+      this.system.update();
+    } else {
+      this.system.hide();
+      //this.system.particleSystem.visible = false;
+    }
+
+    //this.camera.position.set(newX, newY, newZ);
+    //this.system.update();
     //this.controls.update();
   }
 }
