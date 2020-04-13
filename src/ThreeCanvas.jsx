@@ -1,7 +1,13 @@
 import { render } from "@testing-library/react";
 import React, { useRef, useLayoutEffect } from "react";
 import * as THREE from "three";
+
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+import makeCity from "./makecity";
+import makeCity2 from "./makeCity2";
+import MouseGame from "./MouseGame";
+//const THREE = require("three");
 
 const ThreeCanvas = (props) => {
   console.log("engine render");
@@ -9,6 +15,8 @@ const ThreeCanvas = (props) => {
   let camera;
   let scene;
   let renderer;
+  let game = null;
+
   let geometry;
   let material;
   let mesh;
@@ -31,25 +39,19 @@ const ThreeCanvas = (props) => {
     window.scene = scene;
     window.THREE = THREE;
 
-    geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    material = new THREE.MeshNormalMaterial();
-
-    mesh = new THREE.Mesh(geometry, material);
-    let mesh2 = new THREE.Mesh(geometry, material);
-    scene.add(camera);
-    scene.add(mesh);
-    scene.add(mesh2);
-    camera.add(mesh);
-
-    mesh.position.set(0, 0, -1);
-
     renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: true,
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    controls = new OrbitControls(camera, canvasRef.current);
+    game = new MouseGame({
+      scene,
+      camera,
+      renderer,
+      element: canvasRef.current,
+    });
+    game.init();
 
     renderLoop = requestAnimationFrame(animate);
   };
@@ -58,7 +60,7 @@ const ThreeCanvas = (props) => {
 
   const animate = () => {
     renderLoop = requestAnimationFrame(animate);
-    console.log("loop");
+    game.update();
     //mesh.rotation.x += 0.01;
     //mesh.rotation.y += 0.02;
     //controls.update();

@@ -6,10 +6,13 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "physijs-webpack": "^0.1.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.1",
-    "three": "^0.115.0"
+    "three": "^0.115.0",
+    "three-ply-loader": "^1.0.0",
+    "webworkify": "^1.5.0"
   },
   "scripts": {
     "start": "react-scripts start",
