@@ -9,6 +9,7 @@ import makeCity2 from "./makeCity2";
 import LookControls from "./LookControls";
 import { Vector3 } from "three";
 import ParticleSystem from "./ParticleSystem";
+import Rocket from "./Rocket";
 //import Partykals from "partykals";
 
 class MouseGame {
@@ -29,6 +30,8 @@ class MouseGame {
     this.boostAcc = new Vector3(0, 10, 0);
     this.boost = false;
 
+    this.rocketList = [];
+
     this.buildingMap = null;
   }
 
@@ -44,6 +47,7 @@ class MouseGame {
     this.camera.add(mesh);
 
     mesh.position.set(0, 0, -1);
+    this.mouse = mesh;
     this.camera.position.set(0, 100, 0);
 
     //makeCity2({ scene, steps: 100 });
@@ -121,6 +125,13 @@ class MouseGame {
 
   setupKeys() {
     document.addEventListener(
+      "click",
+      function (event) {
+        this.makeNewRocket();
+      }.bind(this)
+    );
+
+    document.addEventListener(
       "keydown",
       function (event) {
         if (event.code == "Space") {
@@ -190,6 +201,19 @@ class MouseGame {
     return false;
   }
 
+  makeNewRocket() {
+    this.scene.updateMatrixWorld();
+    let rocketPosition = new Vector3();
+    rocketPosition.setFromMatrixPosition(this.mouse.matrixWorld);
+    this.rocketList.push(
+      new Rocket({
+        scene: this.scene,
+        position: rocketPosition,
+        direction: this.camera.getWorldDirection(),
+      })
+    );
+  }
+
   update() {
     //console.log("loop");
     //console.log(this.camera.position.y);
@@ -204,6 +228,10 @@ class MouseGame {
     //this.controls.target.set(newX, newY, newZ);
 
     this.velocity = new Vector3();
+
+    for (let i = 0; i < this.rocketList.length; i++) {
+      this.rocketList[i].update();
+    }
 
     //this.velocity.add(new Vector3(0, -10, 0));
 

@@ -85,8 +85,8 @@ class LookControls {
     if (this.locked) {
       this.euler.setFromQuaternion(this.camera.quaternion);
 
-      this.euler.y -= e.movementX * 0.001;
-      this.euler.x -= e.movementY * 0.001;
+      this.euler.y -= e.movementX * 0.0001;
+      this.euler.x -= e.movementY * 0.0001;
 
       this.euler.x = Math.max(-this.PI_2, Math.min(this.PI_2, this.euler.x));
 
