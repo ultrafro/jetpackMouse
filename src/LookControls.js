@@ -27,8 +27,10 @@ class LookControls {
       document.exitPointerLock || document.mozExitPointerLock;
 
     this.element.addEventListener("click", () => {
-      console.log("requesting pointer lock!");
-      this.element.requestPointerLock();
+      if (!this.locked) {
+        console.log("requesting pointer lock!");
+        this.element.requestPointerLock();
+      }
     });
 
     document.addEventListener(
@@ -85,8 +87,8 @@ class LookControls {
     if (this.locked) {
       this.euler.setFromQuaternion(this.camera.quaternion);
 
-      this.euler.y -= e.movementX * 0.0001;
-      this.euler.x -= e.movementY * 0.0001;
+      this.euler.y -= e.movementX * 0.0002;
+      this.euler.x -= e.movementY * 0.0002;
 
       this.euler.x = Math.max(-this.PI_2, Math.min(this.PI_2, this.euler.x));
 

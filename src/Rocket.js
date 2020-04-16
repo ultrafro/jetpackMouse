@@ -5,6 +5,7 @@ import ParticleSystem from "./ParticleSystem";
 class Rocket {
   constructor({ scene, position, direction }) {
     this.speed = 200;
+    //this.speed = 0.1;
 
     this.scene = scene;
     this.startPosition = position.clone();
@@ -25,11 +26,14 @@ class Rocket {
 
     this.system = new ParticleSystem({
       numParticles: 100,
-      velocity: direction.clone().multiplyScalar(-100),
-      lifetime: 0.5,
-      radius: 1,
+      //velocity: direction.clone().multiplyScalar(-100),
+      velocity: new Vector3(0, 0, -200),
+      lifetime: 1,
+      radius: 0.1,
+      emissionRate: 100,
       startColor: new THREE.Color(1, 0, 0),
       stopColor: new THREE.Color(1, 0, 0),
+      size: 3,
       src: "smoke.png",
     });
 
