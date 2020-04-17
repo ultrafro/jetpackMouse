@@ -184,6 +184,11 @@ class MouseGame {
 
   checkCollision({ position, buildingMap }) {
     let collision = false;
+
+    if (position.y < 0) {
+      return true;
+    }
+
     for (let key in buildingMap) {
       let building = buildingMap[key];
 
@@ -207,11 +212,19 @@ class MouseGame {
     rocketPosition.setFromMatrixPosition(this.mouse.matrixWorld);
     this.rocketList.push(
       new Rocket({
+        game: this,
         scene: this.scene,
         position: rocketPosition,
         direction: this.camera.getWorldDirection(),
       })
     );
+  }
+
+  removeRocket(rocket) {
+    const index = this.rocketList.indexOf(rocket);
+    if (index > -1) {
+      this.rocketList.splice(index, 1);
+    }
   }
 
   update() {

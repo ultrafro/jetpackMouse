@@ -3,8 +3,10 @@ import { Vector3 } from "three";
 import ParticleSystem from "./ParticleSystem";
 
 class Rocket {
-  constructor({ scene, position, direction }) {
+  constructor({ game, scene, position, direction }) {
+    this.game = game;
     this.speed = 200;
+    this.explosionTime = 2;
     //this.speed = 0.1;
 
     this.scene = scene;
@@ -23,6 +25,7 @@ class Rocket {
     this.mesh.lookAt(lookPosition);
 
     this.startTime = performance.now() / 1000;
+    this.travel = true;
 
     this.system = new ParticleSystem({
       numParticles: 100,
@@ -41,16 +44,55 @@ class Rocket {
     this.mesh.add(this.system.particleSystem);
   }
 
-  update() {
-    let now = performance.now() / 1000;
-    let deltaT = (now - this.startTime) * this.speed;
-    //console.log("deltaT: " + deltaT);
-    let newPosition = this.startPosition.clone();
-    newPosition.add(this.direction.clone().multiplyScalar(deltaT));
-    this.mesh.position.copy(newPosition);
+  explode() {
+    this.travel = false;
 
-    this.system.show();
-    this.system.update();
+    this.explosion = new ParticleSystem({
+      numParticles: 10,
+      //velocity: direction.clone().multiplyScalar(-100),
+      velocity: new Vector3(0, 0, 0),
+      lifetime: this.explosionTime,
+      radius: 1,
+      emissionRate: 1000,
+      startColor: new THREE.Color(1, 0, 0),
+      stopColor: new THREE.Color(1, 0, 0),
+      size: 20,
+      src: "smoke.png",
+    });
+    this.scene.add(this.explosion.particleSystem);
+    this.explosion.particleSystem.position.copy(this.mesh.position);
+
+    setTimeout(() => {
+      this.scene.remove(this.mesh);
+      this.scene.remove(this.system.particleSystem);
+      this.scene.remove(this.explosion.particleSystem);
+
+      this.game.removeRocket(this);
+    }, this.explosionTime * 1000);
+  }
+
+  update() {
+    if (this.travel) {
+      let now = performance.now() / 1000;
+      let deltaT = (now - this.startTime) * this.speed;
+      //console.log("deltaT: " + deltaT);
+      let newPosition = this.startPosition.clone();
+      newPosition.add(this.direction.clone().multiplyScalar(deltaT));
+      this.mesh.position.copy(newPosition);
+
+      this.system.show();
+      this.system.update();
+
+      if (
+        this.game.checkCollision({
+          position: this.mesh.position,
+          buildingMap: this.game.buildingMap,
+        })
+      ) {
+        //explode and die!
+        this.explode();
+      }
+    }
   }
 }
 export default Rocket;
