@@ -12,11 +12,15 @@ import ParticleSystem from "./ParticleSystem";
 import Rocket from "./Rocket";
 import Explosion from "./Explosion";
 import Networking from "./Networking";
+import Mouse from "./Mouse";
 //import Partykals from "partykals";
 
 class MouseGame {
   constructor({ scene, camera, renderer, element }) {
     this.Networking = new Networking();
+
+    this.lastNetworkUpdate = 0;
+    this.networkUpdatePeriod = 50;
 
     this.scene = scene;
     this.camera = camera;
@@ -41,19 +45,19 @@ class MouseGame {
   }
 
   init() {
+    this.objects = {};
+
     //console.log("MOUSEGAME INIT");
     let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     let material = new THREE.MeshNormalMaterial();
 
-    let mesh = new THREE.Mesh(geometry, material);
+    //let mesh = new THREE.Mesh(geometry, material);
     let mesh2 = new THREE.Mesh(geometry, material);
     this.scene.add(this.camera);
-    this.scene.add(mesh);
+    //this.scene.add(mesh);
     this.scene.add(mesh2);
-    this.camera.add(mesh);
 
-    mesh.position.set(0, 0, -1);
-    this.mouse = mesh;
+    //this.mouse = mesh;
     this.camera.position.set(0, 100, 0);
 
     //makeCity2({ scene, steps: 100 });
@@ -66,27 +70,32 @@ class MouseGame {
 
     this.buildingMap = buildingMap;
 
-    this.system = new ParticleSystem({
-      numParticles: 100,
-      velocity: new Vector3(0, -10.0, 0),
-      lifetime: 0.1,
-      radius: 1,
-      startColor: new THREE.Color(1, 0, 0),
-      stopColor: new THREE.Color(1, 0, 0),
-      src: "smoke.png",
-    });
+    this.mouse = new Mouse({ scene: this.scene });
+    this.mouseID = this.Networking.add(this.mouse.serialize());
+    this.objects[this.mouseID] = this.mouse;
 
-    this.scene.add(this.system.particleSystem);
-    mesh.add(this.system.particleSystem);
-    this.system.particleSystem.position.set(-0.5, -2, -4);
+    this.camera.add(this.mouse.object);
+    this.mouse.object.position.set(0, 0, -1);
+
+    // this.system = new ParticleSystem({
+    //   numParticles: 100,
+    //   velocity: new Vector3(0, -10.0, 0),
+    //   lifetime: 0.1,
+    //   radius: 1,
+    //   startColor: new THREE.Color(1, 0, 0),
+    //   stopColor: new THREE.Color(1, 0, 0),
+    //   src: "smoke.png",
+    // });
+
+    // this.scene.add(this.system.particleSystem);
+    // mesh.add(this.system.particleSystem);
+    // this.system.particleSystem.position.set(-0.5, -2, -4);
 
     this.controls = new LookControls(this.camera, this.element);
     this.setupKeys();
 
-    this.objects = {};
-
-    this.mouseID = this.Networking.add(this.serialize(this.camera));
-    this.objects[this.mouseID] = mesh;
+    // this.mouseID = this.Networking.add(this.serialize(this.camera));
+    // this.objects[this.mouseID] = mesh;
 
     this.Networking.EE.on("objects", (data) => {
       //debugger;
@@ -95,6 +104,12 @@ class MouseGame {
           if (this.objects[key] == null) {
             //debugger;
             //create new object
+
+            if (data[key].type == "mouse") {
+              this.objects[key] = new Mouse({ scene: this.scene });
+              this.objects[key].networkUpdate(data[key]);
+            }
+
             if (data[key].type == "explosion") {
               this.objects[key] = new Explosion({
                 scene: this.scene,
@@ -111,7 +126,6 @@ class MouseGame {
               let onCollision = null;
               if (this.Networking.master) {
                 onCollision = (rocket) => {
-                  debugger;
                   let newData = { ...data[key] };
                   newData.travel = false;
                   this.Networking.update({ id: key, data: newData });
@@ -256,7 +270,7 @@ class MouseGame {
   makeNewRocket() {
     this.scene.updateMatrixWorld();
     let rocketPosition = new Vector3();
-    rocketPosition.setFromMatrixPosition(this.mouse.matrixWorld);
+    rocketPosition.setFromMatrixPosition(this.mouse.object.matrixWorld);
     let direction = this.camera.getWorldDirection();
     let data = {
       x: rocketPosition.x,
@@ -317,7 +331,7 @@ class MouseGame {
 
     for (let key in this.objects) {
       if (this.objects[key].update) {
-        console.log("updating: " + key);
+        //console.log("updating: " + key);
         this.objects[key].update();
       }
     }
@@ -417,11 +431,22 @@ class MouseGame {
 
     if (this.boost) {
       //this.system.particleSystem.visible = true;
-      this.system.show();
-      this.system.update();
+      this.mouse.jet = true;
+      //this.system.show();
+      //this.system.update();
     } else {
-      this.system.hide();
+      this.mouse.jet = false;
+      //this.system.hide();
       //this.system.particleSystem.visible = false;
+    }
+
+    if (performance.now() - this.lastNetworkUpdate > this.networkUpdatePeriod) {
+      this.lastNetworkUpdate = performance.now();
+
+      this.Networking.update({
+        id: this.mouseID,
+        data: this.mouse.serialize(),
+      });
     }
 
     //this.camera.position.set(newX, newY, newZ);
