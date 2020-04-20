@@ -106,10 +106,45 @@ class MouseGame {
                 },
               });
             }
+
+            if (data[key].type == "rocket") {
+              let onCollision = null;
+              if (this.Networking.master) {
+                onCollision = (rocket) => {
+                  debugger;
+                  let newData = { ...data[key] };
+                  newData.travel = false;
+                  this.Networking.update({ id: key, data: newData });
+                  this.makeExplosion(rocket);
+                  setTimeout(() => {
+                    this.Networking.remove(key);
+                  }, 2000);
+                };
+              }
+
+              this.objects[key] = new Rocket({
+                game: this,
+                scene: this.scene,
+                position: new Vector3(data[key].x, data[key].y, data[key].z),
+                direction: new Vector3(
+                  data[key].dx,
+                  data[key].dy,
+                  data[key].dz
+                ),
+                onCollision: onCollision,
+              });
+            }
           } else {
-            //debugger;
-            this.objects[key].download(data[key]);
+            this.objects[key].networkUpdate(data[key]);
+            //this.objects[key].download(data[key]);
           }
+        }
+      }
+
+      for (let key in this.objects) {
+        if (data[key] == null) {
+          this.objects[key].remove();
+          delete this.objects[key];
         }
       }
     });
@@ -222,17 +257,30 @@ class MouseGame {
     this.scene.updateMatrixWorld();
     let rocketPosition = new Vector3();
     rocketPosition.setFromMatrixPosition(this.mouse.matrixWorld);
-    this.rocketList.push(
-      new Rocket({
-        game: this,
-        scene: this.scene,
-        position: rocketPosition,
-        direction: this.camera.getWorldDirection(),
-        onCollision: (rocket) => {
-          this.makeExplosion(rocket);
-        },
-      })
-    );
+    let direction = this.camera.getWorldDirection();
+    let data = {
+      x: rocketPosition.x,
+      y: rocketPosition.y,
+      z: rocketPosition.z,
+      dx: direction.x,
+      dy: direction.y,
+      dz: direction.z,
+      travel: true,
+      type: "rocket",
+    };
+    this.Networking.add(data);
+
+    // this.rocketList.push(
+    //   new Rocket({
+    //     game: this,
+    //     scene: this.scene,
+    //     position: rocketPosition,
+    //     direction: this.camera.getWorldDirection(),
+    //     onCollision: (rocket) => {
+    //       this.makeExplosion(rocket);
+    //     },
+    //   })
+    // );
   }
 
   makeExplosion(rocket) {

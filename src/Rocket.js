@@ -72,6 +72,17 @@ class Rocket {
     }, this.explosionTime * 1000);
   }
 
+  networkUpdate(data) {
+    if (data.travel != null) {
+      this.travel = data.travel;
+    }
+  }
+
+  remove() {
+    this.scene.remove(this.mesh);
+    this.scene.remove(this.system.particleSystem);
+  }
+
   update() {
     if (this.travel) {
       let now = performance.now() / 1000;
@@ -84,27 +95,38 @@ class Rocket {
       this.system.show();
       this.system.update();
 
-      if (
-        this.game.checkCollision({
-          position: this.mesh.position,
-          buildingMap: this.game.buildingMap,
-        })
-      ) {
-        this.travel = false;
-        setTimeout(() => {
-          this.scene.remove(this.mesh);
-          this.scene.remove(this.system.particleSystem);
-          //this.scene.remove(this.explosion.particleSystem);
-
-          this.game.removeRocket(this);
-        }, this.explosionTime * 1000);
-
-        //explode and die!
-        //this.explode();
-        if (this.onCollision) {
+      if (this.onCollision) {
+        if (
+          this.game.checkCollision({
+            position: this.mesh.position,
+            buildingMap: this.game.buildingMap,
+          })
+        ) {
           this.onCollision(this);
         }
       }
+
+      // if (
+      //   this.game.checkCollision({
+      //     position: this.mesh.position,
+      //     buildingMap: this.game.buildingMap,
+      //   })
+      // ) {
+      //   this.travel = false;
+      //   setTimeout(() => {
+      //     this.scene.remove(this.mesh);
+      //     this.scene.remove(this.system.particleSystem);
+      //     //this.scene.remove(this.explosion.particleSystem);
+
+      //     this.game.removeRocket(this);
+      //   }, this.explosionTime * 1000);
+
+      //   //explode and die!
+      //   //this.explode();
+      //   if (this.onCollision) {
+      //     this.onCollision(this);
+      //   }
+      // }
     }
   }
 }

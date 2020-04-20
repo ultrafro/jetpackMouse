@@ -29,7 +29,7 @@ class Explosion {
     this.particleSystem.particleSystem.position.set(data.x, data.y, data.z);
   }
 
-  download = (data) => {
+  networkUpdate = (data) => {
     this.particleSystem.particleSystem.position.set(data.x, data.y, data.z);
   };
 
@@ -43,5 +43,7 @@ class Explosion {
       }
     }
   };
+
+  remove = () => {};
 }
 export default Explosion;
