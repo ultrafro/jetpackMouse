@@ -3,7 +3,8 @@ import { Vector3 } from "three";
 import ParticleSystem from "./ParticleSystem";
 
 class Rocket {
-  constructor({ game, scene, position, direction }) {
+  constructor({ game, scene, position, direction, onCollision }) {
+    this.onCollision = onCollision;
     this.game = game;
     this.speed = 200;
     this.explosionTime = 2;
@@ -89,8 +90,20 @@ class Rocket {
           buildingMap: this.game.buildingMap,
         })
       ) {
+        this.travel = false;
+        setTimeout(() => {
+          this.scene.remove(this.mesh);
+          this.scene.remove(this.system.particleSystem);
+          //this.scene.remove(this.explosion.particleSystem);
+
+          this.game.removeRocket(this);
+        }, this.explosionTime * 1000);
+
         //explode and die!
-        this.explode();
+        //this.explode();
+        if (this.onCollision) {
+          this.onCollision(this);
+        }
       }
     }
   }

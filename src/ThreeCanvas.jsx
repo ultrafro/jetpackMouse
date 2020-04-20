@@ -1,5 +1,5 @@
 import { render } from "@testing-library/react";
-import React, { useRef, useLayoutEffect } from "react";
+import React, { useRef, useEffect, useLayoutEffect } from "react";
 import * as THREE from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -12,10 +12,16 @@ import MouseGame from "./MouseGame";
 const ThreeCanvas = (props) => {
   console.log("engine render");
   const canvasRef = useRef(null);
-  let camera;
-  let scene;
-  let renderer;
-  let game = null;
+
+  const camera = useRef(null);
+  const scene = useRef(null);
+  const game = useRef(null);
+  const renderer = useRef(null);
+
+  //let camera;
+  //let scene;
+  //let renderer;
+  //let game = null;
 
   let geometry;
   let material;
@@ -23,35 +29,40 @@ const ThreeCanvas = (props) => {
   let controls;
   let renderLoop;
 
+  useEffect(() => {
+    setup();
+  }, []);
+
   const setup = () => {
     console.log("setup scene!");
-    init();
-  };
 
-  const init = () => {
-    camera = new THREE.PerspectiveCamera(
+    refreshRenderer();
+
+    camera.current = new THREE.PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight
     );
-    camera.position.z = 1;
+    camera.current.position.z = 1;
 
-    scene = new THREE.Scene();
-    window.scene = scene;
+    scene.current = new THREE.Scene();
+    window.scene = scene.current;
     window.THREE = THREE;
 
-    renderer = new THREE.WebGLRenderer({
+    game.current = new MouseGame({
+      scene: scene.current,
+      camera: camera.current,
+      renderer: renderer.current,
+      element: canvasRef.current,
+    });
+    game.current.init();
+  };
+
+  const refreshRenderer = () => {
+    renderer.current = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
       antialias: true,
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    game = new MouseGame({
-      scene,
-      camera,
-      renderer,
-      element: canvasRef.current,
-    });
-    game.init();
+    renderer.current.setSize(window.innerWidth, window.innerHeight);
 
     renderLoop = requestAnimationFrame(animate);
   };
@@ -60,15 +71,16 @@ const ThreeCanvas = (props) => {
 
   const animate = () => {
     renderLoop = requestAnimationFrame(animate);
-    game.update();
+    game.current.update();
     //mesh.rotation.x += 0.01;
     //mesh.rotation.y += 0.02;
     //controls.update();
-    renderer.render(scene, camera);
+    renderer.current.render(scene.current, camera.current);
   };
 
-  useLayoutEffect(() => {
-    setup();
+  useEffect(() => {
+    refreshRenderer();
+    // setup();
     return () => {
       cancelAnimationFrame(renderLoop);
       takedown();

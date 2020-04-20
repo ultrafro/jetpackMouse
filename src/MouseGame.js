@@ -10,10 +10,14 @@ import LookControls from "./LookControls";
 import { Vector3 } from "three";
 import ParticleSystem from "./ParticleSystem";
 import Rocket from "./Rocket";
+import Explosion from "./Explosion";
+import Networking from "./Networking";
 //import Partykals from "partykals";
 
 class MouseGame {
   constructor({ scene, camera, renderer, element }) {
+    this.Networking = new Networking();
+
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
@@ -33,9 +37,11 @@ class MouseGame {
     this.rocketList = [];
 
     this.buildingMap = null;
+    //console.log("MOUSEGAME CONSTRUCTOR");
   }
 
   init() {
+    //console.log("MOUSEGAME INIT");
     let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     let material = new THREE.MeshNormalMaterial();
 
@@ -74,53 +80,59 @@ class MouseGame {
     mesh.add(this.system.particleSystem);
     this.system.particleSystem.position.set(-0.5, -2, -4);
 
-    // // create the particle variables
-    // var particleCount = 1800;
-    // var particles = new THREE.Geometry();
-    // // var pMaterial = new THREE.ParticleBasicMaterial({
-    // //     color: 0xffffff,
-    // //     size: 20,
-    // //   });
-
-    // var pMaterial = new THREE.ParticleBasicMaterial({
-    //   color: 0xffffff,
-    //   size: 20,
-    //   map: THREE.ImageUtils.loadTexture("smoke.png"),
-    //   blending: THREE.AdditiveBlending,
-    //   transparent: true,
-    // });
-
-    // // now create the individual particles
-    // for (var p = 0; p < particleCount; p++) {
-    //   // create a particle with random
-    //   // position values, -250 -> 250
-    //   let pX = Math.random() * 500 - 250,
-    //     pY = Math.random() * 500 - 250,
-    //     pZ = Math.random() * 500 - 250,
-    //     v = new THREE.Vector3(pX, pY, pZ);
-    //   let particle = new THREE.Vertex(pX, pY, pZ);
-    //   //particle = new THREE.Vertex(new THREE.Vector3(pX, pY, pZ));
-
-    //   //console.log(pX, pY, pZ);
-    //   // add it to the geometry
-    //   particles.vertices.push(particle);
-    // }
-
-    // // create the particle system
-    // //this.particleSystem = new THREE.ParticleSystem(particles, pMaterial);
-    // this.particleSystem = new THREE.Points(particles, pMaterial);
-    // this.particleSystem.sortParticles = true;
-
-    // // add it to the scene
-    // this.scene.add(this.particleSystem);
-
-    //this.controls = new OrbitControls(this.camera, this.element);
-    //this.controls = new PointerLockControls(this.camera, this.element);
-    //this.controls = new pointer(this.camera, this.element);
-    // this.controls = new pointer(this.camera);
-    //this.controls.unlock();
     this.controls = new LookControls(this.camera, this.element);
     this.setupKeys();
+
+    this.objects = {};
+
+    this.mouseID = this.Networking.add(this.serialize(this.camera));
+    this.objects[this.mouseID] = mesh;
+
+    this.Networking.EE.on("objects", (data) => {
+      //debugger;
+      for (let key in data) {
+        if (key != this.mouseID) {
+          if (this.objects[key] == null) {
+            //debugger;
+            //create new object
+            if (data[key].type == "explosion") {
+              this.objects[key] = new Explosion({
+                scene: this.scene,
+                id: key,
+                data: data[key],
+                onFinished: (explosion) => {
+                  this.Networking.remove(key);
+                  delete this.objects[key];
+                },
+              });
+            }
+          } else {
+            //debugger;
+            this.objects[key].download(data[key]);
+          }
+        }
+      }
+    });
+
+    this.Networking.EE.on("userDisconnect", () => {
+      this.Networking.remove(this.mouseID);
+      delete this.objects[this.mouseID];
+    });
+  }
+
+  serialize(object) {
+    let val = {};
+    val.x = object.position.x.toFixed(3);
+    val.y = object.position.y.toFixed(3);
+    val.z = object.position.z.toFixed(3);
+    val.vx = 0;
+    val.vy = 0;
+    val.vz = 0;
+    val.type = "mouse";
+
+    return val;
+
+    //return JSON.stringify(val);
   }
 
   setupKeys() {
@@ -216,8 +228,17 @@ class MouseGame {
         scene: this.scene,
         position: rocketPosition,
         direction: this.camera.getWorldDirection(),
+        onCollision: (rocket) => {
+          this.makeExplosion(rocket);
+        },
       })
     );
+  }
+
+  makeExplosion(rocket) {
+    let data = this.serialize(rocket.mesh);
+    data.type = "explosion";
+    let explosionID = this.Networking.add(data);
   }
 
   removeRocket(rocket) {
@@ -244,6 +265,13 @@ class MouseGame {
 
     for (let i = 0; i < this.rocketList.length; i++) {
       this.rocketList[i].update();
+    }
+
+    for (let key in this.objects) {
+      if (this.objects[key].update) {
+        console.log("updating: " + key);
+        this.objects[key].update();
+      }
     }
 
     //this.velocity.add(new Vector3(0, -10, 0));
