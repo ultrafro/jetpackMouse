@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import rand from "./rand";
 const makeCity = (renderer) => {
   let buildingMap = [];
 
@@ -28,16 +29,14 @@ const makeCity = (renderer) => {
   for (var i = 0; i < 2000; i++) {
     //for (var i = 0; i < 20; i++) {
     // put a random position
-    buildingMesh.position.x = Math.floor(Math.random() * 200 - 100) * 10;
-    buildingMesh.position.z = Math.floor(Math.random() * 200 - 100) * 10;
+    buildingMesh.position.x = Math.floor(rand() * 200 - 100) * 10;
+    buildingMesh.position.z = Math.floor(rand() * 200 - 100) * 10;
     // put a random rotation
-    buildingMesh.rotation.y = Math.random() * Math.PI * 2;
+    buildingMesh.rotation.y = rand() * Math.PI * 2;
     // put a random scale
-    buildingMesh.scale.x =
-      Math.random() * Math.random() * Math.random() * Math.random() * 50 + 10;
+    buildingMesh.scale.x = rand() * rand() * rand() * rand() * 50 + 10;
     buildingMesh.scale.y =
-      Math.random() * Math.random() * Math.random() * buildingMesh.scale.x * 8 +
-      8;
+      rand() * rand() * rand() * buildingMesh.scale.x * 8 + 8;
     buildingMesh.scale.z = buildingMesh.scale.x;
 
     buildingMap.push({
@@ -51,11 +50,11 @@ const makeCity = (renderer) => {
     });
 
     // establish the base color for the buildingMesh
-    var value = 1 - Math.random() * Math.random();
+    var value = 1 - rand() * rand();
     var baseColor = new THREE.Color().setRGB(
-      value + Math.random() * 0.1,
+      value + rand() * 0.1,
       value,
-      value + Math.random() * 0.1
+      value + rand() * 0.1
     );
     // set topColor/bottom vertexColors as adjustement of baseColor
     var topColor = baseColor.clone().multiply(light);
@@ -109,7 +108,7 @@ const makeCity = (renderer) => {
     // draw the window rows - with a small noise to simulate light variations in each room
     for (var y = 2; y < 64; y += 2) {
       for (var x = 0; x < 32; x += 2) {
-        var value = Math.floor(Math.random() * 64);
+        var value = Math.floor(rand() * 64);
         context.fillStyle = "rgb(" + [value, value, value].join(",") + ")";
         context.fillRect(x, y, 2, 1);
       }
