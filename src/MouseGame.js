@@ -117,7 +117,10 @@ class MouseGame {
                 data: data[key],
                 onFinished: (explosion) => {
                   this.Networking.remove(key);
-                  delete this.objects[key];
+                  if (this.objects[key]) {
+                    this.objects[key].remove();
+                    delete this.objects[key];
+                  }
                 },
               });
             }

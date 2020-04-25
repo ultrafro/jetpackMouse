@@ -37,13 +37,15 @@ class Explosion {
     let now = performance.now() / 1000;
 
     if (now - this.creationTime > this.explosionTime) {
-      this.scene.remove(this.particleSystem.particleSystem);
+      this.remove();
       if (this.onFinished) {
         this.onFinished(this);
       }
     }
   };
 
-  remove = () => {};
+  remove = () => {
+    this.scene.remove(this.particleSystem.particleSystem);
+  };
 }
 export default Explosion;
