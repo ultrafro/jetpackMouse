@@ -20,7 +20,7 @@ class Networking {
     this.EE = new EventEmitter();
 
     this.handleURL();
-    this.joinGame();
+    //this.joinGame();
     //debugger;
     //console.log("NETWORKING CONSTRUCTOR");
   }
@@ -36,7 +36,7 @@ class Networking {
 
     usersRef.on(
       "value",
-      function (snapshot) {
+      ((snapshot) => {
         //change to the users
         console.log("change to the users!");
 
@@ -57,7 +57,7 @@ class Networking {
             this.EE.emit("masterChange", false);
           }
         }
-      }.bind(this)
+      }).bind(this)
     );
 
     let objectsRef = firebase.database().ref(this.gameID + "/objects");

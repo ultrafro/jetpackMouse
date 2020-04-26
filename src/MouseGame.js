@@ -13,6 +13,7 @@ import Rocket from "./Rocket";
 import Explosion from "./Explosion";
 import Networking from "./Networking";
 import Mouse from "./Mouse";
+import MechaCat from "./MechaCat";
 //import Partykals from "partykals";
 
 class MouseGame {
@@ -125,6 +126,14 @@ class MouseGame {
               });
             }
 
+            if (data[key].type == "mechaCat") {
+              this.objects[key] = new MechaCat({
+                scene: this.scene,
+                game: this,
+              });
+              this.objects[key].networkUpdate(data[key]);
+            }
+
             if (data[key].type == "rocket") {
               let onCollision = null;
               if (this.Networking.master) {
@@ -170,7 +179,20 @@ class MouseGame {
       this.Networking.remove(this.mouseID);
       delete this.objects[this.mouseID];
     });
+
+    this.Networking.EE.on("masterChange", this.onMaster);
+
+    this.Networking.joinGame();
   }
+
+  onMaster = () => {
+    if (this.Networking.master) {
+      console.log("NEW CAT!");
+      this.cat = new MechaCat({ scene: this.scene, game: this });
+      this.catID = this.Networking.add(this.cat.serialize());
+      this.objects[this.catID] = this.cat;
+    }
+  };
 
   serialize(object) {
     let val = {};
