@@ -7,12 +7,21 @@ class MechaCat {
     this.scene = scene;
     this.game = game;
 
-    this.speed = 1.0;
+    this.speed = 0.2;
 
-    let geometry = new THREE.BoxGeometry(1, 10, 1);
+    this.height = 100;
+    this.range = 1000;
+    let geometry = new THREE.BoxGeometry(25, this.height, 25);
     let material = new THREE.MeshNormalMaterial();
 
     this.object = new THREE.Mesh(geometry, material);
+    this.object.position.add(
+      new Vector3(
+        Math.random() * this.range - this.range / 2,
+        this.height / 2,
+        Math.random() * this.range - this.range / 2
+      )
+    );
     this.scene.add(this.object);
   }
 
@@ -47,7 +56,7 @@ class MechaCat {
     right.cross(up);
 
     let radius = 10;
-    let theta = (((Math.random() - 0.5) / 0.5) * 30 * Math.PI) / 180.0; //+30/-30 in radians
+    let theta = (((Math.random() - 0.5) / 0.5) * 90 * Math.PI) / 180.0; //+30/-30 in radians
     let forwardCoeff = radius * Math.cos(theta);
     let rightCoeff = radius * Math.sin(theta);
 
@@ -72,13 +81,20 @@ class MechaCat {
         this.makeNewDestination();
       } else {
         //console.log("updating cat: " + this.object.position + " dist: " + dist);
-
+        // console.log(
+        //   "destination: " + this.destination.x,
+        //   this.destination.y,
+        //   this.destination.z
+        // );
         let direction = new Vector3().copy(this.destination);
         direction.sub(this.object.position);
         direction.normalize();
+        //console.log("direction: " + direction.x, direction.y, direction.z);
         direction.multiplyScalar(this.speed);
 
         this.object.position.add(direction);
+        this.object.lookAt(this.destination);
+        //console.log("direction: " + direction.x, direction.y, direction.z);
       }
     }
 
@@ -91,14 +107,16 @@ class MechaCat {
   };
 
   networkUpdate = (data) => {
-    if (data.x != null && (data.y != null) & (data.z != null)) {
-      this.object.position.set(data.x, data.y, data.z);
-    }
-    if (
-      data.qx != null &&
-      (data.qy != null) & (data.qz != null) & (data.qw != null)
-    ) {
-      this.object.quaternion.set(data.qx, data.qy, data.qz, data.qw);
+    if (!this.game.Networking.master) {
+      if (data.x != null && (data.y != null) & (data.z != null)) {
+        this.object.position.set(data.x, data.y, data.z);
+      }
+      if (
+        data.qx != null &&
+        (data.qy != null) & (data.qz != null) & (data.qw != null)
+      ) {
+        this.object.quaternion.set(data.qx, data.qy, data.qz, data.qw);
+      }
     }
   };
 
