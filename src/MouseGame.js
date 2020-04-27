@@ -185,12 +185,24 @@ class MouseGame {
     this.Networking.joinGame();
   }
 
-  onMaster = () => {
+  onMaster = async () => {
     if (this.Networking.master) {
-      console.log("NEW CAT!");
-      this.cat = new MechaCat({ scene: this.scene, game: this });
-      this.catID = this.Networking.add(this.cat.serialize());
-      this.objects[this.catID] = this.cat;
+      let objects = await this.Networking.getObjects();
+
+      //make sure there are 20 mechacats.
+      let mechaCatCount = 0;
+      for (let key in objects) {
+        if (objects[key].type == "mechaCat") {
+          mechaCatCount++;
+        }
+      }
+      for (let i = 0; i < 3 - mechaCatCount; i++) {
+        console.log("NEW CAT!");
+        let cat = new MechaCat({ scene: this.scene, game: this });
+        let catID = this.Networking.add(cat.serialize());
+        cat.remove();
+        //this.objects[this.catID] = this.cat;
+      }
     }
   };
 
@@ -472,6 +484,17 @@ class MouseGame {
         id: this.mouseID,
         data: this.mouse.serialize(),
       });
+
+      if (this.Networking.master) {
+        for (let key in this.objects) {
+          if (this.objects[key].type == "mechaCat") {
+            this.Networking.update({
+              id: key,
+              data: this.objects[key].serialize(),
+            });
+          }
+        }
+      }
     }
 
     //this.camera.position.set(newX, newY, newZ);

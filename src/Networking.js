@@ -69,6 +69,15 @@ class Networking {
     );
   };
 
+  getObjects = () => {
+    return new Promise((resolve, reject) => {
+      let objectsRef = firebase.database().ref(this.gameID + "/objects");
+      objectsRef.once("value", (snapshot) => {
+        resolve(snapshot.val());
+      });
+    });
+  };
+
   add = (data) => {
     let id = this.newID();
     let objectsRef = firebase.database().ref(this.gameID + "/objects");

@@ -4,6 +4,7 @@ import ParticleSystem from "./ParticleSystem";
 
 class MechaCat {
   constructor({ scene, game }) {
+    this.type = "mechaCat";
     this.scene = scene;
     this.game = game;
 
