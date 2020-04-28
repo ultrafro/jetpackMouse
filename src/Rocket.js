@@ -100,7 +100,7 @@ class Rocket {
           this.game.checkCollision({
             position: this.mesh.position,
             buildingMap: this.game.buildingMap,
-          })
+          }).hit
         ) {
           this.onCollision(this);
         }

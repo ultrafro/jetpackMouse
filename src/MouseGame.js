@@ -281,10 +281,10 @@ class MouseGame {
   }
 
   checkCollision({ position, buildingMap }) {
-    let collision = false;
+    let collision = { hit: false, object: null, key: null };
 
     if (position.y < 0) {
-      return true;
+      return { hit: true, object: "floor", key: null };
     }
 
     for (let key in buildingMap) {
@@ -296,12 +296,32 @@ class MouseGame {
       let ydist = position.y - building.scaleY;
 
       if (xdist < building.scaleX && zdist < building.scaleZ && ydist < 0.5) {
-        collision = true;
-        return true;
+        collision.hit = true;
+        collision.object = "building";
+        collision.key = null;
+
+        return collision;
       }
     }
 
-    return false;
+    for (let key in this.objects) {
+      if (this.objects[key].type == "mechaCat") {
+        let cat = this.objects[key].object;
+        let xdist = Math.abs(position.x - cat.position.x);
+        let zdist = Math.abs(position.z - cat.position.z);
+        let ydist = position.y - this.objects[key].height;
+
+        if (xdist < 25 && zdist < 25 && ydist < 0.5) {
+          collision.hit = true;
+          collision.object = "mechaCat";
+          collision.key = key;
+
+          return collision;
+        }
+      }
+    }
+
+    return { hit: false, object: null, key: null };
   }
 
   makeNewRocket() {
@@ -455,7 +475,7 @@ class MouseGame {
     });
     //console.log("time to check collision: " + (performance.now() - start));
 
-    if (potentialPosition.y < 0 || collision) {
+    if (potentialPosition.y < 0 || collision.hit) {
       this.velocity = new Vector3(0, 0, 0);
       this.gravityVel = new Vector3();
       this.boostVel = new Vector3();
