@@ -16,7 +16,7 @@ class Mouse {
       velocity: new Vector3(0, -10.0, 0),
       lifetime: 0.1,
       radius: 1,
-      startColor: new THREE.Color(1, 0, 0),
+      startColor: new THREE.Color(1, 1, 1),
       stopColor: new THREE.Color(1, 0, 0),
       src: "smoke.png",
     });

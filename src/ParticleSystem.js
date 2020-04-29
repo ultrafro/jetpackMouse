@@ -32,10 +32,14 @@ class ParticleSystem {
       this.emissionRate = 10; //particles per second
     }
 
+    if (this.startColor == null) {
+      this.startColor = 0xffffff;
+    }
+
     this.particles = new THREE.Geometry();
     var pMaterial = new THREE.ParticleBasicMaterial({
       //color: THREE.VertexColors,
-      color: 0xffffff,
+      color: this.startColor,
       size: this.size,
       map: THREE.ImageUtils.loadTexture(src),
       blending: THREE.AdditiveBlending,

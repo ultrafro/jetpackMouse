@@ -14,6 +14,7 @@ import Explosion from "./Explosion";
 import Networking from "./Networking";
 import Mouse from "./Mouse";
 import MechaCat from "./MechaCat";
+import Damage from "./Damage";
 //import Partykals from "partykals";
 
 class MouseGame {
@@ -123,6 +124,14 @@ class MouseGame {
                     delete this.objects[key];
                   }
                 },
+              });
+            }
+
+            if (data[key].type == "damage") {
+              this.objects[key] = new Damage({
+                scene: this.scene,
+                id: key,
+                data: data[key],
               });
             }
 

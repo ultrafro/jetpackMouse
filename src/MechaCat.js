@@ -12,6 +12,10 @@ class MechaCat {
 
     this.height = 100;
     this.range = 1000;
+
+    this.lastDamageTime = 0;
+    this.damagePeriod = 5;
+
     let geometry = new THREE.BoxGeometry(25, this.height, 25);
     let material = new THREE.MeshNormalMaterial();
 
@@ -96,6 +100,17 @@ class MechaCat {
         this.object.position.add(direction);
         this.object.lookAt(this.destination);
         //console.log("direction: " + direction.x, direction.y, direction.z);
+      }
+
+      if (performance.now() / 1000 - this.lastDamageTime > this.damagePeriod) {
+        this.lastDamageTime = performance.now() / 1000;
+        let data = {
+          x: this.object.position.x,
+          y: 0,
+          z: this.object.position.z,
+          type: "damage",
+        };
+        this.game.Networking.add(data);
       }
     }
 

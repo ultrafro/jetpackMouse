@@ -19,7 +19,7 @@ class Explosion {
       lifetime: this.explosionTime,
       radius: 1,
       emissionRate: 1000,
-      startColor: new THREE.Color(1, 0, 0),
+      startColor: new THREE.Color(1, 1, 1),
       stopColor: new THREE.Color(1, 0, 0),
       size: 20,
       src: "smoke.png",

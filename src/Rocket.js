@@ -35,7 +35,7 @@ class Rocket {
       lifetime: 1,
       radius: 0.1,
       emissionRate: 100,
-      startColor: new THREE.Color(1, 0, 0),
+      startColor: new THREE.Color(1, 1, 1),
       stopColor: new THREE.Color(1, 0, 0),
       size: 3,
       src: "smoke.png",
