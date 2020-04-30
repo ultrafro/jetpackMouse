@@ -100,6 +100,18 @@ class Networking {
     objectsRef.remove();
   };
 
+  reduceHP = (id) => {
+    let objectRef = firebase
+      .database()
+      .ref(this.gameID + "/objects/" + id + "/hp");
+    objectRef.transaction(function (currentHP) {
+      if (currentHP == null) {
+        currentHP = 10;
+      }
+      return currentHP - 1;
+    });
+  };
+
   newID = () => {
     return (
       Math.random().toString(36).substring(2, 15) +

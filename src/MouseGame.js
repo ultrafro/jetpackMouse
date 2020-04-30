@@ -146,7 +146,7 @@ class MouseGame {
             if (data[key].type == "rocket") {
               let onCollision = null;
               if (this.Networking.master) {
-                onCollision = (rocket) => {
+                onCollision = (rocket, object) => {
                   let newData = { ...data[key] };
                   newData.travel = false;
                   this.Networking.update({ id: key, data: newData });
@@ -154,6 +154,15 @@ class MouseGame {
                   setTimeout(() => {
                     this.Networking.remove(key);
                   }, 2000);
+
+                  if (object.key) {
+                    if (
+                      this.objects[object.key] &&
+                      this.objects[object.key].type == "mechaCat"
+                    ) {
+                      this.Networking.reduceHP(object.key);
+                    }
+                  }
                 };
               }
 

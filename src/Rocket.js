@@ -96,13 +96,12 @@ class Rocket {
       this.system.update();
 
       if (this.onCollision) {
-        if (
-          this.game.checkCollision({
-            position: this.mesh.position,
-            buildingMap: this.game.buildingMap,
-          }).hit
-        ) {
-          this.onCollision(this);
+        let collisionData = this.game.checkCollision({
+          position: this.mesh.position,
+          buildingMap: this.game.buildingMap,
+        });
+        if (collisionData.hit) {
+          this.onCollision(this, collisionData);
         }
       }
 

@@ -7,6 +7,7 @@ class MechaCat {
     this.type = "mechaCat";
     this.scene = scene;
     this.game = game;
+    this.hp = 10;
 
     this.speed = 0.2;
 
@@ -46,6 +47,7 @@ class MechaCat {
     data.qy = quaternion.y;
     data.qz = quaternion.z;
     data.qw = quaternion.w;
+    data.hp = this.hp;
 
     data.type = "mechaCat";
 
@@ -123,6 +125,10 @@ class MechaCat {
   };
 
   networkUpdate = (data) => {
+    if (data.hp != null) {
+      this.hp = data.hp;
+    }
+
     if (!this.game.Networking.master) {
       if (data.x != null && (data.y != null) & (data.z != null)) {
         this.object.position.set(data.x, data.y, data.z);
