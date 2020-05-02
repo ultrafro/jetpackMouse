@@ -3,11 +3,15 @@ import { Vector3, Quaternion } from "three";
 import ParticleSystem from "./ParticleSystem";
 
 class MechaCat {
-  constructor({ scene, game }) {
+  constructor({ scene, game, onDeath }) {
     this.type = "mechaCat";
     this.scene = scene;
     this.game = game;
     this.hp = 10;
+    this.targetHp = 10;
+    this.targetHpTime = 0;
+    this.hpSpeed = 1;
+    this.onDeath = onDeath;
 
     this.speed = 0.2;
 
@@ -18,7 +22,8 @@ class MechaCat {
     this.damagePeriod = 5;
 
     let geometry = new THREE.BoxGeometry(25, this.height, 25);
-    let material = new THREE.MeshNormalMaterial();
+    let material = new THREE.MeshStandardMaterial();
+    material.color = new THREE.Color(1.0, 1.0, 0.0);
 
     this.object = new THREE.Mesh(geometry, material);
     this.object.position.add(
@@ -47,7 +52,7 @@ class MechaCat {
     data.qy = quaternion.y;
     data.qz = quaternion.z;
     data.qw = quaternion.w;
-    data.hp = this.hp;
+    data.hp = this.targetHp;
 
     data.type = "mechaCat";
 
@@ -116,6 +121,23 @@ class MechaCat {
       }
     }
 
+    //handle hp animation
+    let elapsedHPTime = performance.now() / 1000 - this.targetHpTime;
+    let hpDist = elapsedHPTime * this.hpSpeed;
+    hpDist = Math.min(hpDist, Math.abs(this.hp - this.targetHp));
+    this.hp =
+      this.hp +
+      (hpDist * (this.targetHp - this.hp)) / Math.abs(this.hp - this.targetHp);
+
+    let col_val = Math.cos(
+      ((2 * Math.PI * performance.now()) / 1000) *
+        (1 / Math.max(this.targetHp / 5, 0.1))
+    );
+    col_val = col_val + 1;
+    col_val = col_val / 2;
+    let col = new THREE.Color(1, col_val, 0);
+    this.object.material.color = col;
+
     // if (this.jet) {
     //   this.system.show();
     // } else {
@@ -126,7 +148,16 @@ class MechaCat {
 
   networkUpdate = (data) => {
     if (data.hp != null) {
-      this.hp = data.hp;
+      this.targetHp = data.hp;
+      this.targetHpTime = performance.now() / 1000;
+
+      if (data.hp <= 0) {
+        console.log("about to die");
+        console.log(data);
+        if (this.onDeath) {
+          this.onDeath(this);
+        }
+      }
     }
 
     if (!this.game.Networking.master) {

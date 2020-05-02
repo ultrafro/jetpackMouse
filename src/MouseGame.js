@@ -136,9 +136,22 @@ class MouseGame {
             }
 
             if (data[key].type == "mechaCat") {
+              let onDeath = null;
+              if (this.Networking.master) {
+                onDeath = (cat) => {
+                  this.Networking.remove(key);
+                  // setTimeout(() => {
+                  //   cat.remove();
+                  //   delete this.objects[key];
+                  //   this.Networking.remove(key);
+                  // }, 1000);
+                };
+              }
+
               this.objects[key] = new MechaCat({
                 scene: this.scene,
                 game: this,
+                onDeath: onDeath,
               });
               this.objects[key].networkUpdate(data[key]);
             }
@@ -214,7 +227,7 @@ class MouseGame {
           mechaCatCount++;
         }
       }
-      for (let i = 0; i < 3 - mechaCatCount; i++) {
+      for (let i = 0; i < 5 - mechaCatCount; i++) {
         console.log("NEW CAT!");
         let cat = new MechaCat({ scene: this.scene, game: this });
         let catID = this.Networking.add(cat.serialize());

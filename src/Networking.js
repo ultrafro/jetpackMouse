@@ -19,6 +19,8 @@ class Networking {
 
     this.EE = new EventEmitter();
 
+    this.lockset = {};
+
     this.handleURL();
     //this.joinGame();
     //debugger;
@@ -80,19 +82,27 @@ class Networking {
 
   add = (data) => {
     let id = this.newID();
+    this.lockset[id] = true;
     let objectsRef = firebase.database().ref(this.gameID + "/objects");
     let val = {};
     val[id] = data;
-    objectsRef.update(val);
+    objectsRef.update(val, () => {
+      this.lockset[id] = false;
+    });
 
     return id;
   };
 
   update = ({ id, data }) => {
-    let objectsRef = firebase.database().ref(this.gameID + "/objects");
-    let val = {};
-    val[id] = data;
-    objectsRef.update(val);
+    if (this.lockset[id] == false) {
+      this.lockset[id] = true;
+      let objectsRef = firebase.database().ref(this.gameID + "/objects");
+      let val = {};
+      val[id] = data;
+      objectsRef.update(val, () => {
+        this.lockset[id] = false;
+      });
+    }
   };
 
   remove = (id) => {
@@ -101,15 +111,28 @@ class Networking {
   };
 
   reduceHP = (id) => {
-    let objectRef = firebase
-      .database()
-      .ref(this.gameID + "/objects/" + id + "/hp");
-    objectRef.transaction(function (currentHP) {
-      if (currentHP == null) {
-        currentHP = 10;
-      }
-      return currentHP - 1;
-    });
+    if (this.lockset[id] == false) {
+      this.lockset[id] = true;
+      console.log("reducing hp!!");
+      let objectRef = firebase
+        .database()
+        .ref(this.gameID + "/objects/" + id + "/hp");
+      objectRef.transaction(
+        function (currentHP) {
+          if (currentHP == null) {
+            currentHP = 10;
+          }
+          if (currentHP - 1 >= 0) {
+            return currentHP - 1;
+          } else {
+            return 0;
+          }
+        },
+        () => {
+          this.lockset[id] = false;
+        }
+      );
+    }
   };
 
   newID = () => {
