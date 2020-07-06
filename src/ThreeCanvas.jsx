@@ -7,6 +7,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import makeCity from "./makecity";
 import makeCity2 from "./makeCity2";
 import MouseGame from "./MouseGame";
+import JetGame from "./JetGame";
 //const THREE = require("three");
 
 const ThreeCanvas = (props) => {
@@ -31,6 +32,7 @@ const ThreeCanvas = (props) => {
 
   useEffect(() => {
     setup();
+    renderLoop = requestAnimationFrame(animate);
   }, []);
 
   const setup = () => {
@@ -48,13 +50,19 @@ const ThreeCanvas = (props) => {
     window.scene = scene.current;
     window.THREE = THREE;
 
-    game.current = new MouseGame({
+    // game.current = new MouseGame({
+    //   scene: scene.current,
+    //   camera: camera.current,
+    //   renderer: renderer.current,
+    //   element: canvasRef.current,
+    // });
+    game.current = new JetGame({
       scene: scene.current,
       camera: camera.current,
       renderer: renderer.current,
       element: canvasRef.current,
     });
-    game.current.init();
+    //game.current.init();
   };
 
   const refreshRenderer = () => {
@@ -63,29 +71,24 @@ const ThreeCanvas = (props) => {
       antialias: true,
     });
     renderer.current.setSize(window.innerWidth, window.innerHeight);
-
-    renderLoop = requestAnimationFrame(animate);
   };
 
   const takedown = () => {};
 
   const animate = () => {
-    renderLoop = requestAnimationFrame(animate);
     game.current.update();
-    //mesh.rotation.x += 0.01;
-    //mesh.rotation.y += 0.02;
-    //controls.update();
     renderer.current.render(scene.current, camera.current);
+    renderLoop = requestAnimationFrame(animate);
   };
 
-  useEffect(() => {
-    refreshRenderer();
-    // setup();
-    return () => {
-      cancelAnimationFrame(renderLoop);
-      takedown();
-    };
-  }, [props]);
+  // useEffect(() => {
+  //   refreshRenderer();
+  //   // setup();
+  //   return () => {
+  //     cancelAnimationFrame(renderLoop);
+  //     takedown();
+  //   };
+  // }, [props]);
 
   const render = () => {
     return <canvas ref={canvasRef}></canvas>;

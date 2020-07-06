@@ -27,11 +27,43 @@ class LookControls {
       document.exitPointerLock || document.mozExitPointerLock;
 
     this.element.addEventListener("click", () => {
+      //debugger;
       if (!this.locked) {
         console.log("requesting pointer lock!");
         this.element.requestPointerLock();
       }
     });
+
+    document.addEventListener(
+      "pointerlockchange",
+      () => {
+        console.log("POINTER LOCK CHANGE");
+      },
+      false
+    );
+    document.addEventListener(
+      "mozpointerlockchange",
+      () => {
+        console.log("MOZ POINTER LOCK CHANGE");
+      },
+      false
+    );
+    document.addEventListener(
+      "pointerlockerror",
+      (e) => {
+        console.log("POINTER LOCK ERROR");
+        console.log(e);
+      },
+      false
+    );
+    document.addEventListener(
+      "mozpointerlockerror",
+      (e) => {
+        console.log("MOZ POINTER LOCK ERROR");
+        console.log(e);
+      },
+      false
+    );
 
     document.addEventListener(
       "pointerlockchange",
@@ -65,6 +97,7 @@ class LookControls {
       document.pointerLockElement === this.element ||
       document.mozPointerLockElement === this.element
     ) {
+      debugger;
       console.log("The pointer lock status is now locked");
       document.addEventListener(
         "mousemove",
