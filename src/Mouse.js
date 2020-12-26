@@ -3,8 +3,8 @@ import { Vector3, Quaternion } from "three";
 import ParticleSystem from "./ParticleSystem";
 
 class Mouse {
-  constructor({ scene }) {
-    this.scene = scene;
+  constructor({ game, data }) {
+    this.scene = game.scene;
 
     let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     let material = new THREE.MeshNormalMaterial();

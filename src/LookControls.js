@@ -27,7 +27,6 @@ class LookControls {
       document.exitPointerLock || document.mozExitPointerLock;
 
     this.element.addEventListener("click", () => {
-      //debugger;
       if (!this.locked) {
         console.log("requesting pointer lock!");
         this.element.requestPointerLock();
@@ -97,7 +96,6 @@ class LookControls {
       document.pointerLockElement === this.element ||
       document.mozPointerLockElement === this.element
     ) {
-      debugger;
       console.log("The pointer lock status is now locked");
       document.addEventListener(
         "mousemove",

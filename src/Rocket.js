@@ -3,16 +3,22 @@ import { Vector3 } from "three";
 import ParticleSystem from "./ParticleSystem";
 
 class Rocket {
-  constructor({ game, scene, position, direction, onCollision }) {
+  constructor({ game, data, onCollision }) {
     this.onCollision = onCollision;
     this.game = game;
     this.speed = 200;
     this.explosionTime = 2;
     //this.speed = 0.1;
 
-    this.scene = scene;
-    this.startPosition = position.clone();
-    this.direction = direction.clone();
+    this.scene = this.game.scene;
+    this.startPosition = new Vector3();
+    if (data.position) {
+      this.startPosition = data.position.clone();
+    }
+    this.startDirection = new Vector3(0, 1, 0);
+    if (data.direction) {
+      this.direction = data.direction.clone();
+    }
 
     let geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     let material = new THREE.MeshNormalMaterial();
@@ -20,9 +26,9 @@ class Rocket {
     this.mesh = new THREE.Mesh(geometry, material);
 
     this.scene.add(this.mesh);
-    this.mesh.position.copy(position);
+    this.mesh.position.copy(this.startPosition);
 
-    let lookPosition = this.startPosition.clone().add(direction);
+    let lookPosition = this.startPosition.clone().add(this.startDirection);
     this.mesh.lookAt(lookPosition);
 
     this.startTime = performance.now() / 1000;
@@ -89,17 +95,14 @@ class Rocket {
       let deltaT = (now - this.startTime) * this.speed;
       //console.log("deltaT: " + deltaT);
       let newPosition = this.startPosition.clone();
-      newPosition.add(this.direction.clone().multiplyScalar(deltaT));
+      newPosition.add(this.startDirection.clone().multiplyScalar(deltaT));
       this.mesh.position.copy(newPosition);
 
       this.system.show();
       this.system.update();
 
       if (this.onCollision) {
-        let collisionData = this.game.checkCollision({
-          position: this.mesh.position,
-          buildingMap: this.game.buildingMap,
-        });
+        let collisionData = this.game.map.checkCollision(this.mesh.position);
         if (collisionData.hit) {
           this.onCollision(this, collisionData);
         }

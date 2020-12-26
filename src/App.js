@@ -11,13 +11,15 @@ import {
   Link,
   hashHistory,
 } from "react-router-dom";
+import TRQ from "./TRQ.jsx";
 
 function App() {
   return (
     <div className="App">
       {/* <header className="App-header"></header> */}
       <BrowserRouter>
-        <Route path="*" component={ThreeCanvas}></Route>
+        {/* <Route path="*" component={ThreeCanvas}></Route> */}
+        <Route path="*" component={TRQ}></Route>
       </BrowserRouter>
     </div>
   );

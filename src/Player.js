@@ -1,8 +1,9 @@
 import * as THREE from "three";
 import { Vector3 } from "three";
 import LookControls from "./LookControls";
+import Mouse from "./Mouse";
 
-class PlayerMovement {
+class Player {
   constructor(game) {
     this.game = game;
 
@@ -18,6 +19,18 @@ class PlayerMovement {
     this.boost = false;
     this.controls = new LookControls(this.game.camera, this.game.element);
     this.setupKeys();
+
+    this.game.mouse = new Mouse({ game: this.game });
+    this.game.mouseID = this.game.Networking.newID();
+    this.game.objects[this.game.mouseID] = this.game.mouse;
+    this.game.camera.add(this.game.mouse.object);
+    this.game.mouse.object.position.set(0, 0, -1);
+    let data = this.game.mouse.serialize();
+    data.id = this.game.mouseID;
+    this.game.Networking.add(data);
+
+    //player rocket:
+    document.addEventListener("click", this.makeRocket.bind(this));
   }
 
   update() {
@@ -116,6 +129,25 @@ class PlayerMovement {
     }
   }
 
+  makeRocket() {
+    console.log("make rocket");
+    this.game.scene.updateMatrixWorld();
+    let rocketPosition = new Vector3();
+    rocketPosition.setFromMatrixPosition(this.game.mouse.object.matrixWorld);
+    let direction = this.game.camera.getWorldDirection();
+    let data = {
+      x: rocketPosition.x,
+      y: rocketPosition.y,
+      z: rocketPosition.z,
+      dx: direction.x,
+      dy: direction.y,
+      dz: direction.z,
+      travel: true,
+      type: "rocket",
+    };
+    this.game.Networking.add(data);
+  }
+
   setupKeys() {
     document.addEventListener(
       "keydown",
@@ -168,4 +200,4 @@ class PlayerMovement {
     );
   }
 }
-export default PlayerMovement;
+export default Player;

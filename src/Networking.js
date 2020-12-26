@@ -81,7 +81,12 @@ class Networking {
   };
 
   add = (data) => {
-    let id = this.newID();
+    let id = null;
+    if (data.id) {
+      id = data.id;
+    } else {
+      id = this.newID();
+    }
     this.lockset[id] = true;
     let objectsRef = firebase.database().ref(this.gameID + "/objects");
     let val = {};

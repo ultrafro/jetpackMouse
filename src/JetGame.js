@@ -3,12 +3,9 @@ import Game from "./Game";
 import GameObject from "./GameObject";
 import Networking from "./Networking";
 
-import makeCity from "./makecity";
-import LookControls from "./LookControls";
-import { Vector3 } from "three";
-import Mouse from "./Mouse";
 import Map from "./Map";
-import PlayerMovement from "./PlayerMovement";
+import Player from "./Player";
+import Definitions from "./Definitions";
 
 class JetGame extends Game {
   constructor({ scene, camera, renderer, element }) {
@@ -25,15 +22,38 @@ class JetGame extends Game {
     //stuff for the scene:
     this.setupScene();
 
-    //player:
-    this.mouse = new Mouse({ scene: this.scene });
-    this.objects[this.mouseID] = this.mouse;
-    this.camera.add(this.mouse.object);
-    this.mouse.object.position.set(0, 0, -1);
-    this.mouseID = this.Networking.add(this.mouse.serialize());
+    //stuff for player:
+    this.player = new Player(this);
 
-    //stuff for movement:
-    this.playerMovement = new PlayerMovement(this);
+    this.Networking.EE.on("objects", (data) => {
+      for (let key in data) {
+        if (key != this.mouseID) {
+          if (this.objects[key] == null) {
+            //create new object
+            let type = data[key].type;
+            if (Definitions[type]) {
+              console.log("creating new", type);
+              this.objects[key] = new Definitions[type]({
+                game: this,
+                data: data[key],
+              });
+            }
+          }
+
+          this.objects[key].networkUpdate(data[key]);
+        }
+      }
+
+      //remove destroyed objects
+      for (let key in this.objects) {
+        if (data[key] == null) {
+          this.objects[key].remove();
+          delete this.objects[key];
+        }
+      }
+    });
+
+    this.Networking.joinGame();
   }
 
   setupScene = () => {
@@ -46,8 +66,18 @@ class JetGame extends Game {
 
   update() {
     super.update();
-    this.playerMovement.update();
 
+    //update player
+    this.player.update();
+
+    //update all other objects
+    for (let key in this.objects) {
+      if (this.objects[key].update) {
+        this.objects[key].update();
+      }
+    }
+
+    //handle network update of player movement
     if (performance.now() - this.lastNetworkUpdate > this.networkUpdatePeriod) {
       this.lastNetworkUpdate = performance.now();
 
@@ -55,12 +85,6 @@ class JetGame extends Game {
         id: this.mouseID,
         data: this.mouse.serialize(),
       });
-    }
-
-    for (let key in this.objects) {
-      if (this.objects[key].update) {
-        this.objects[key].update();
-      }
     }
   }
 }
