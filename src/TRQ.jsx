@@ -112,5 +112,5 @@ const TRQ = () => {
       )}
     </div>
   );
-};
+}; //
 export default TRQ;
