@@ -77,7 +77,7 @@ const PW = ({ onFinish, gameRef }) => {
       {config.map((element) => {
         let bg = checkCorrect(element) ? "green" : "teal";
         return (
-          <FlexRow style={{ width: "300px", padding: "30px", margin: "auto" }}>
+          <FlexRow style={{ width: "300px", padding: "10px", margin: "auto" }}>
             <FlexRow
               style={{
                 backgroundColor: bg,
