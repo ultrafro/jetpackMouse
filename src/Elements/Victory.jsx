@@ -20,7 +20,7 @@ const Victory = ({ onFinish }) => {
         backgroundImage: 'url("bg3.jpg")',
       }}
     >
-      <h1>Well done ;)</h1>
+      <h4>Well done ;)</h4>
       <h4>Now Make sure your audio is on :)</h4>
       <video ref={videoRef} src="/zukoCrop.mp4"></video>
       <p></p>

@@ -55,7 +55,7 @@ const PW = ({ onFinish, gameRef }) => {
         backgroundImage: 'url("bg3.jpg")',
       }}
     >
-      <h2>Enter in the PWs below:</h2>
+      <h4>Enter in the PWs below:</h4>
       {isComplete() && (
         <button
           style={{
@@ -88,10 +88,10 @@ const PW = ({ onFinish, gameRef }) => {
             >
               <img
                 src={element.icon}
-                style={{ width: "100px", height: "100px", float: "left" }}
+                style={{ width: "50px", height: "50px", float: "left" }}
               />
               <input
-                style={{ height: "75px", float: "left" }}
+                style={{ height: "50px", float: "left" }}
                 value={
                   dbState && dbState[element.key] ? dbState[element.key] : ""
                 }

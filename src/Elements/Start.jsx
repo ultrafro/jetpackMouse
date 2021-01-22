@@ -10,7 +10,7 @@ const Start = ({ onFinish, gameRef }) => {
       }}
     >
       <FlexColumn>
-        <h1>Welcome to the Scavenger hunt!</h1>
+        <h4>Welcome to the Scavenger hunt!</h4>
         <h4>Find the 4 element cards to win</h4>
         <h4>Then enter the passwords on the next screen</h4>
         <h4>Make sure your audio is on :)</h4>
