@@ -11,7 +11,8 @@ import {
   Link,
   hashHistory,
 } from "react-router-dom";
-import TRQ from "./TRQ.jsx";
+//import TRQ from "./TRQ.jsx";
+import Elements from "./Elements.jsx";
 
 function App() {
   return (
@@ -19,7 +20,8 @@ function App() {
       {/* <header className="App-header"></header> */}
       <BrowserRouter>
         {/* <Route path="*" component={ThreeCanvas}></Route> */}
-        <Route path="*" component={TRQ}></Route>
+        {/* <Route path="*" component={TRQ}></Route> */}
+        <Route path="*" component={Elements}></Route>
       </BrowserRouter>
     </div>
   );
