@@ -56,6 +56,24 @@ const PW = ({ onFinish, gameRef }) => {
       }}
     >
       <h2>Enter in the PWs below:</h2>
+      {isComplete() && (
+        <button
+          style={{
+            backgroundColor: "teal",
+            borderRadius: "20px",
+            width: "100px",
+            height: "100px",
+          }}
+          onClick={() => {
+            if (onFinish) {
+              onFinish();
+            }
+          }}
+        >
+          {" "}
+          Start!
+        </button>
+      )}
       {config.map((element) => {
         let bg = checkCorrect(element) ? "green" : "teal";
         return (
@@ -87,24 +105,6 @@ const PW = ({ onFinish, gameRef }) => {
           </FlexRow>
         );
       })}
-      {isComplete() && (
-        <button
-          style={{
-            backgroundColor: "teal",
-            borderRadius: "20px",
-            width: "100px",
-            height: "100px",
-          }}
-          onClick={() => {
-            if (onFinish) {
-              onFinish();
-            }
-          }}
-        >
-          {" "}
-          Start!
-        </button>
-      )}
     </FlexColumn>
   );
 };
